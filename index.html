@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Gorisha & Kanchan's World</title>
+    <style>
+        :root {
+            --accent: #d90429;
+            --text-color: #ffffff;
+        }
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #000;
+            color: var(--text-color);
+            overflow: hidden; /* Prevents scrolling */
+        }
+        
+        /* Fullscreen Video Background */
+        .video-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: #000;
+        }
+        #bg-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.6; /* Dims the video so text is readable */
+            transition: opacity 1s ease-in-out;
+        }
+
+        /* App UI Layer */
+        .app-ui {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3); /* Dark gradient overlay */
+        }
+
+        header {
+            padding: 20px 15px 10px 15px;
+            text-align: center;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+        }
+        h1 { margin: 0; font-size: 26px; font-weight: 400; letter-spacing: 2px; text-transform: uppercase; }
+        .room-label { font-size: 14px; color: #ffccd5; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px;}
+
+        .container {
+            flex: 1;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* Glassmorphism Menus */
+        .glass-panel {
+            background: rgba(20, 20, 20, 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        /* Room Navigation */
+        .room-nav {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        button {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-color);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        button:active, .active-room {
+            background: var(--accent);
+            border-color: var(--accent);
+            box-shadow: 0 0 15px rgba(217, 4, 41, 0.5);
+        }
+
+        /* Task Generator */
+        #task-text {
+            font-size: 18px;
+            font-style: italic;
+            line-height: 1.4;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+        .generate-btn {
+            background: var(--accent);
+            width: 100%;
+            padding: 16px;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            letter-spacing: 1px;
+        }
+
+        /* Soundboard */
+        .soundboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .sound-btn {
+            font-size: 14px;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.5);
+        }
+        .active-sound {
+            background: #ffffff;
+            color: #000;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Fullscreen Video Background -->
+    <div class="video-container">
+        <video id="bg-video" autoplay loop muted playsinline>
+            <!-- Default load is the living room fireplace -->
+            <source src="https://cdn.pixabay.com/video/2021/08/15/85212-590779450_large.mp4" type="video/mp4">
+        </video>
+    </div>
+
+    <!-- UI Overlay -->
+    <div class="app-ui">
+        <header>
+            <h1>Gorisha & Kanchan</h1>
+            <div class="room-label" id="current-room-label">- Living Room -</div>
+        </header>
+
+        <div class="container">
+            
+            <!-- Room Selector -->
+            <div class="room-nav">
+                <button class="active-room" onclick="changeRoom('Living Room')">Living Room</button>
+                <button onclick="changeRoom('Kitchen')">Kitchen</button>
+                <button onclick="changeRoom('Long Drive')">Long Drive</button>
+                <button onclick="changeRoom('Bedroom')">Bedroom</button>
+            </div>
+
+            <!-- Task Generator -->
+            <div class="glass-panel">
+                <div id="task-text">Welcome home. Tap the button below to see what happens next.</div>
+                <button class="generate-btn" onclick="generateTask()">Generate Scenario</button>
+            </div>
+
+            <!-- Soundboard -->
+            <div class="glass-panel" style="padding: 15px;">
+                <p style="margin: 0 0 10px 0; font-size: 12px; color: #aaa; text-transform: uppercase;">Atmosphere Audio</p>
+                <div class="soundboard">
+                    <button class="sound-btn" onclick="toggleAudio('audio-ambient', this)">🌧️ Heavy Rain</button>
+                    <button class="sound-btn" onclick="toggleAudio('audio-drive', this)">🚗 Night Drive</button>
+                    <button class="sound-btn" onclick="toggleAudio('audio-romance', this)">🎵 Slow Romance</button>
+                    <button class="sound-btn" onclick="toggleAudio('audio-intimate', this)">🔥 Deep Mood</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- PRE-LOADED ONLINE AUDIO FILES -->
+    <audio id="audio-ambient" loop src="https://cdn.pixabay.com/download/audio/2021/08/09/audio_82c68e1467.mp3"></audio>
+    <audio id="audio-drive" loop src="https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0c6ff1bc0.mp3"></audio>
+    <audio id="audio-romance" loop src="https://cdn.pixabay.com/download/audio/2022/02/10/audio_fc8ec0a4b3.mp3"></audio>
+    <audio id="audio-intimate" loop src="https://cdn.pixabay.com/download/audio/2022/11/22/audio_78ecfa6765.mp3"></audio> 
+
+    <script>
+        // ONLINE VIDEO LINKS FOR BACKGROUNDS
+        const roomVideos = {
+            // Cozy fireplace
+            'Living Room': 'https://cdn.pixabay.com/video/2021/08/15/85212-590779450_large.mp4', 
+            // Aesthetic coffee/kitchen pouring
+            'Kitchen': 'https://cdn.pixabay.com/video/2020/07/08/44237-438259256_medium.mp4',
+            // Night time dashboard driving view
+            'Long Drive': 'https://cdn.pixabay.com/video/2024/07/14/221180_tiny.mp4',
+            // Raindrops sliding down a dark glass window
+            'Bedroom': 'https://cdn.pixabay.com/video/2022/05/29/118648-714652234_tiny.mp4'
+        };
+
+        // Task Database based on rooms
+        const tasks = {
+            'Living Room': [
+                "Sit together in silence for 2 minutes, just looking at each other over video.",
+                "Discuss exactly what you want the other to wear on your next date.",
+                "Take a selfie of what you are doing right now and send it to Kanchan."
+            ],
+            'Kitchen': [
+                "Describe the perfect meal you want to cook for Gorisha.",
+                "Imagine you are cooking together. Where are your hands right now?",
+                "Send a picture of the last thing you ate or drank."
+            ],
+            'Long Drive': [
+                "Put on your headphones, play the 'Night Drive' audio, and share a deep fantasy you've never told.",
+                "It's night time on the highway. Describe how you reach over to touch the other person.",
+                "Send a voice note whispering what you would do if the car was parked right now."
+            ],
+            'Bedroom': [
+                "Take full control. Tell Kanchan exactly what position you want her in right now.",
+                "Send a 10-second voice note of your real breathing or moans. No words, just feeling.",
+                "Describe in explicit, realistic detail how you take off the other's clothes.",
+                "Tell Gorisha exactly how it feels when you are touched there.",
+                "Sync up. Touch yourself for 2 minutes while looking directly into the camera or reading their texts."
+            ]
+        };
+
+        let currentRoom = 'Living Room';
+
+        function changeRoom(roomName) {
+            currentRoom = roomName;
+            
+            // Update UI Labels
+            document.getElementById('current-room-label').innerText = `- ${roomName} -`;
+            document.getElementById('task-text').innerText = `You entered the ${roomName}. Tap Generate.`;
+            
+            // Update Button Highlights
+            let buttons = document.querySelectorAll('.room-nav button');
+            buttons.forEach(btn => {
+                if(btn.innerText === roomName) {
+                    btn.classList.add('active-room');
+                } else {
+                    btn.classList.remove('active-room');
+                }
+            });
+
+            // Fade out video, change source, fade in
+            const videoElement = document.getElementById('bg-video');
+            videoElement.style.opacity = 0; // Fade out
+            
+            setTimeout(() => {
+                videoElement.src = roomVideos[roomName];
+                videoElement.play();
+                videoElement.style.opacity = 0.6; // Fade back in
+            }, 500); // Waits half a second for the fade effect
+        }
+
+        function generateTask() {
+            const roomTasks = tasks[currentRoom];
+            const randomTask = roomTasks[Math.floor(Math.random() * roomTasks.length)];
+            document.getElementById('task-text').innerText = randomTask;
+        }
+
+        function toggleAudio(id, btn) {
+            let audio = document.getElementById(id);
+            if (audio.paused) {
+                // Pause all others first to prevent overlapping sounds
+                document.querySelectorAll('audio').forEach(a => {
+                    a.pause();
+                });
+                document.querySelectorAll('.sound-btn').forEach(b => {
+                    b.classList.remove('active-sound');
+                });
+                
+                audio.play();
+                btn.classList.add('active-sound');
+            } else {
+                audio.pause();
+                btn.classList.remove('active-sound');
+            }
+        }
+    </script>
+</body>
+</html>
